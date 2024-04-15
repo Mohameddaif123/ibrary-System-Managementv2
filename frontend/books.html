@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="../../static/favicon.png">
+</head>
+<body>
+
+     <!-- Logo container -->
+     <div class="row mt-4 mb-4">
+        <div class="col-md-6">
+            <a href="/">
+                <img src="/static/logo.png" alt="Logo" style="max-height: 100px;">
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Library Management</h1>
+
+        <!-- Add New Book Form -->
+        <h2>Add New Book</h2>
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" class="form-control" id="name" required>
+        </div>
+        <div class="form-group">
+            <label for="author">Author:</label>
+            <input type="text" class="form-control" id="author" required>
+        </div>
+        <div class="form-group">
+            <label for="year_published">Year Published:</label>
+            <input type="number" class="form-control" id="year_published" required>
+        </div>
+        <div class="form-group">
+            <label for="book_type">loan time:</label>
+            <select class="form-control" id="book_type" required>
+                <option value="1">10 days</option>
+                <option value="2">5 days</option>
+                <option value="3">2 days</option>
+            </select>
+        </div>
+        
+        <button type="button" class="btn btn-primary" onclick="addBook()">Add Book</button>
+
+        <!-- Display All Books Button -->
+        <h2>Books</h2>
+
+<button type="button" class="btn btn-primary" onclick="toggleBooksVisibility()" data-toggle="toggleBooks">Show All Books</button>
+
+<table class="table" id="booksTable" style="display: none;">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Author</th>
+            <th>Year Published</th>
+            <th>Book Type</th>
+            <th>Image</th> <!-- New column for book image -->
+        </tr>
+    </thead>
+    <tbody id="bookList">
+    </tbody>
+</table>
+
+       
+    </div>
+
+    <!-- Bootstrap JS and jQuery (optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+       // Function to add a new book
+function addBook() {
+    var name = document.getElementById('name').value;
+    var author = document.getElementById('author').value;
+    var year_published = document.getElementById('year_published').value;
+    var book_type = document.getElementById('book_type').value;
+
+    // Validate input fields
+    if (name.trim() === '' || author.trim() === '' || year_published.trim() === '' || book_type.trim() === '') {
+        alert("Please fill out all fields.");
+        return;
+    }
+
+    axios.post('/add_book', {
+        name: name,
+        author: author,
+        year_published: year_published,
+        book_type: book_type
+    })
+    .then(response => {
+        alert(response.data.message);
+        // Clear input fields
+        document.getElementById('name').value = '';
+        document.getElementById('author').value = '';
+        document.getElementById('year_published').value = '';
+        document.getElementById('book_type').selectedIndex = 0; // Reset book type selection
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+       // Function to toggle the visibility of books
+function toggleBooksVisibility() {
+    var booksTable = document.getElementById('booksTable');
+    var toggleBooksBtn = document.querySelector('button.btn-primary[data-toggle="toggleBooks"]'); // Select the toggle button
+
+    if (booksTable.style.display === 'none') {
+        booksTable.style.display = 'block';
+        toggleBooksBtn.textContent = 'Hide Books';
+        fetchBooks(); // Call fetchBooks() when showing books
+    } else {
+        booksTable.style.display = 'none';
+        toggleBooksBtn.textContent = 'Show All Books';
+    }
+}
+
+
+
+
+        // Function to fetch and display books
+// Function to fetch and display books
+function fetchBooks() {
+    console.log("Fetching books...");
+    axios.get('/books')
+    .then(response => {
+        console.log("Books data received:", response.data);
+        var bookList = '';
+        response.data.forEach(book => {
+            bookList += `<tr>
+                            <td>${book.id}</td>
+                            <td>${book.name}</td>
+                            <td>${book.author}</td>
+                            <td>${book.year_published}</td>
+                            <td>${book.book_type}</td>
+                            <td><img src="/static/defult.png" alt="Book Image" style="max-height: 50px; max-width: 50px;"></td> <!-- Default book image -->
+                        </tr>`;
+        });
+        document.getElementById('bookList').innerHTML = bookList;
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+    </script>
+</body>
+</html>

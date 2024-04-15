@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="../../static/favicon.png">
+</head>
+<body>
+
+     <!-- Logo container -->
+     <div class="row mt-4 mb-4">
+        <div class="col-md-6">
+            <a href="/">
+                <img src="/static/logo.png" alt="Logo" style="max-height: 100px;">
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Search Books and Customers</h1>
+
+        <!-- Book Search Form -->
+        <h2>Search Books</h2>
+        <form id="bookSearchForm">
+            <div class="form-group">
+                <label for="bookSearchQuery">Search Query:</label>
+                <input type="text" class="form-control" id="bookSearchQuery" placeholder="Enter book name">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="searchBooks()">Search</button>
+        </form>
+        <div id="bookSearchResults" class="row"></div>
+
+        <!-- Customer Search Form -->
+        <h2>Search Customers</h2>
+        <form id="customerSearchForm">
+            <div class="form-group">
+                <label for="customerSearchQuery">Search Query:</label>
+                <input type="text" class="form-control" id="customerSearchQuery" placeholder="Enter customer name">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="searchCustomers()">Search</button>
+        </form>
+        <div id="customerSearchResults" class="row"></div>
+    </div>
+
+    <!-- Bootstrap JS and jQuery (optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        // Function to search for books
+        function searchBooks() {
+            var query = document.getElementById('bookSearchQuery').value.trim();
+            if (!query) {
+                alert("Please enter a search query for books.");
+                return;
+            }
+
+            axios.get(`/search_books?query=${query}`)
+            .then(response => {
+                displayBookSearchResults(response.data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Function to display book search results
+        function displayBookSearchResults(books) {
+            var bookResultsDiv = document.getElementById('bookSearchResults');
+            bookResultsDiv.innerHTML = ''; // Clear previous results
+
+            if (books.length === 0) {
+                bookResultsDiv.innerHTML = '<p>No books found.</p>';
+                return;
+            }
+
+            var resultList = '';
+            books.forEach(book => {
+                resultList += `
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">${book.name}</h5>
+                                <p class="card-text">Author: ${book.author}</p>
+                                <p class="card-text">Published: ${book.year_published}</p>
+                                <p class="card-text">Type: ${book.book_type}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            bookResultsDiv.innerHTML = resultList;
+        }
+
+        // Function to search for customers
+        function searchCustomers() {
+            var query = document.getElementById('customerSearchQuery').value.trim();
+            if (!query) {
+                alert("Please enter a search query for customers.");
+                return;
+            }
+
+            axios.get(`/search_customers?query=${query}`)
+            .then(response => {
+                displayCustomerSearchResults(response.data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Function to display customer search results
+        function displayCustomerSearchResults(customers) {
+            var customerResultsDiv = document.getElementById('customerSearchResults');
+            customerResultsDiv.innerHTML = ''; // Clear previous results
+
+            if (customers.length === 0) {
+                customerResultsDiv.innerHTML = '<p>No customers found.</p>';
+                return;
+            }
+
+            var resultList = '';
+            customers.forEach(customer => {
+                resultList += `
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">${customer.name}</h5>
+                                <p class="card-text">City: ${customer.city}</p>
+                                <p class="card-text">Age: ${customer.age}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            customerResultsDiv.innerHTML = resultList;
+        }
+    </script>
+</body>
+</html>

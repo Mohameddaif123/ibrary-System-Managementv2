@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Register</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Toastify CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="../../static/favicon.png">
+</head>
+<body>
+
+     <!-- Logo container -->
+     <div class="row mt-4 mb-4">
+        <div class="col-md-6">
+            <a href="/">
+                <img src="/static/logo.png" alt="Logo" style="max-height: 100px;">
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <div class="card" id="loginCard">
+                    <div class="card-header" id="cardHeader">
+                        <ul class="nav nav-tabs card-header-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="loginTab" data-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="true">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="registerTab" data-toggle="tab" href="#register" role="tab" aria-controls="register" aria-selected="false">Register</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="loginTab">
+                                <form id="loginForm">
+                                    <div class="form-group">
+                                        <label for="loginUsername">Username</label>
+                                        <input type="text" class="form-control" id="loginUsername" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="loginPassword">Password</label>
+                                        <input type="password" class="form-control" id="loginPassword" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="registerTab">
+                                <form id="registerForm">
+                                    <div class="form-group">
+                                        <label for="registerUsername">Username</label>
+                                        <input type="text" class="form-control" id="registerUsername" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="registerPassword">Password</label>
+                                        <input type="password" class="form-control" id="registerPassword" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="registerRole">Role</label>
+                                        <select class="form-control" id="registerRole">
+                                            <option value="user">User</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block">Register</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logout form -->
+                <div class="card" id="logoutCard" style="display:none;">
+                    <div class="card-header" id="logoutHeader">
+                        Logout
+                    </div>
+                    <div class="card-body">
+                        <button type="button" class="btn btn-danger btn-block" onclick="logout()">Logout</button>
+                        <button type="button" class="btn btn-secondary btn-block mt-2" id="goToHomePage">Go to Home Page</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and jQuery (optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Toastify -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        const login = async () => {
+            try {
+                const loginUsername = document.getElementById("loginUsername");
+                const loginPassword = document.getElementById("loginPassword");
+        
+                const response = await axios.post("http://127.0.0.1:5000/user/login", {
+                    username: loginUsername.value,
+                    password: loginPassword.value
+                });
+        
+                localStorage.setItem("access_token", response.data.access_token);
+                
+                // Clear login fields
+                loginUsername.value = '';
+                loginPassword.value = '';
+        
+                // Hide login form
+                document.getElementById("loginCard").style.display = "none";
+                
+                // Show logout form
+                document.getElementById("logoutCard").style.display = "block";
+    
+                // Show welcome message
+                Toastify({
+                    text: "Welcome to your account!",
+                    duration: 3000,
+                    close: true,
+                    gravity: "top-right",
+                    position: "center",
+                    backgroundColor: "green",
+                    stopOnFocus: true,
+                }).showToast();
+            } catch (error) {
+                Toastify({
+                    text: "Login failed. Please try again.",
+                    duration: 4000,
+                    close: true,
+                    gravity: "top",
+                    position: "left",
+                    backgroundColor: "red",
+                    stopOnFocus: true,
+                }).showToast();
+                console.error(error);
+            }
+        };
+        
+        // Logout function
+        const logout = () => {
+            // Redirect to login page
+            window.location.href = '/login.html';
+        };
+
+        // Function to go to home page
+        const goToHomePage = () => {
+            // Redirect to home page
+            window.location.href = '/';
+        };
+
+        // Register function
+        function registerUser() {
+            const registerUsername = document.getElementById('registerUsername');
+            const registerPassword = document.getElementById('registerPassword');
+            const registerRole = document.getElementById('registerRole');
+
+            if (registerUsername && registerPassword && registerRole) {
+                const username = registerUsername.value;
+                const password = registerPassword.value;
+                const role = registerRole.value;
+
+                axios.post('http://127.0.0.1:5000/user/register', { username, password, role })
+                    .then(response => {
+                        if (response.status === 201) {
+                            // Clear register fields
+                            registerUsername.value = '';
+                            registerPassword.value = '';
+                            registerRole.selectedIndex = 0;
+
+                            Toastify({
+                                text: "Registration successful.",
+                                duration: 3000,
+                                gravity: "bottom",
+                                position: "right",
+                                backgroundColor: "green",
+                            }).showToast();
+                        } else {
+                            Toastify({
+                                text: "Registration failed.",
+                                duration: 3000,
+                                gravity: "bottom",
+                                position: "right",
+                                backgroundColor: "red",
+                            }).showToast();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Toastify({
+                            text: "An error occurred during registration.",
+                            duration: 3000,
+                            gravity: "bottom",
+                            position: "right",
+                            backgroundColor: "red",
+                        }).showToast();
+                    });
+            } else {
+                console.error('Error: One or more input elements not found.');
+            }
+        }
+
+        // Add event listener for login form submission
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            login();
+        });
+
+        // Add event listener for register form submission
+        document.getElementById("registerForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            registerUser();
+        });
+
+        // Add event listener for go to home page button
+        document.getElementById("goToHomePage").addEventListener("click", function() {
+            goToHomePage();
+        });
+    </script>
+</body>
+</html>
