@@ -98,6 +98,30 @@
     <!-- Toastify -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
+
+        const isLoggedIn = () => {
+            return localStorage.getItem("access_token") !== null;
+        };
+    
+        const showLogin = () => {
+            document.getElementById("loginCard").style.display = "block";
+            document.getElementById("logoutCard").style.display = "none";
+        };
+    
+        const showLogout = () => {
+            document.getElementById("loginCard").style.display = "none";
+            document.getElementById("logoutCard").style.display = "block";
+        };
+    
+        const checkLoginState = () => {
+            if (isLoggedIn()) {
+                showLogout();
+            } else {
+                showLogin();
+            }
+        };
+
+
         const login = async () => {
             try {
                 const loginUsername = document.getElementById("loginUsername");
@@ -108,7 +132,8 @@
                     password: loginPassword.value
                 });
         
-                localStorage.setItem("access_token", response.data.access_token);
+        // Store access token in localStorage
+        localStorage.setItem("access_token", response.data.access_token)
                 
                 // Clear login fields
                 loginUsername.value = '';
@@ -142,19 +167,24 @@
                 }).showToast();
                 console.error(error);
             }
+            checkLoginState();
         };
         
-        // Logout function
         const logout = () => {
-            // Redirect to login page
-            window.location.href = '/login.html';
+            localStorage.removeItem("access_token");
+            showLogin();
         };
+    
+        // Call checkLoginState when the page loads
+        checkLoginState();
 
         // Function to go to home page
         const goToHomePage = () => {
             // Redirect to home page
             window.location.href = '/';
         };
+
+        
 
         // Register function
         function registerUser() {
@@ -226,3 +256,4 @@
     </script>
 </body>
 </html>
+
