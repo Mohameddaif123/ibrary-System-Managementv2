@@ -47,9 +47,19 @@
 
         <!-- Display Late Loans -->
         <h2>Late Loans</h2>
-        <button type="button" class="btn btn-primary" onclick="fetchLateLoans()">Fetch Late Loans</button>
         <ul id="lateLoans"></ul>
+
+        <!-- Mark Loan as Late -->
+       <h2>Mark Loan as Late</h2>
+       <div class="form-group">
+       <label for="lateBookName">Book to Mark as Late:</label>
+       <select class="form-control" id="lateBookName" required>
+        <!-- Options will be populated dynamically -->
+    </select>
+    <button type="button" class="btn btn-primary" onclick="markAsLate()">Mark as Late</button>
+
     </div>
+    
 
     <!-- Bootstrap JS and jQuery (optional) -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -84,7 +94,20 @@ function fetchCustomersAndBooks() {
         });
     })
     .catch(error => console.error('Error fetching books:', error));
+
+    // Fetch existing loans to populate the late loan dropdown
+    axios.get('/loans')
+    .then(response => {
+        var lateBookDropdown = document.getElementById('lateBookName');
+        response.data.forEach(loan => {
+            var option = document.createElement('option');
+            option.text = `Customer: ${loan.customer_name}, Book: ${loan.book_name}, Loan Date: ${loan.loan_date}`;
+            lateBookDropdown.appendChild(option);
+        });
+    })
+    .catch(error => console.error('Error fetching loans:', error));
 }
+
 
 // Function to loan a book
 function loanBook() {
@@ -191,13 +214,42 @@ function toggleAllLoans() {
     }
 }
 
-// Function to fetch late loans
-function fetchLateLoans() {
+// Function to fetch late loans and store them in local storage
+function fetchLateLoansAndStore() {
     axios.get('/late_loans')
-    .then(response => {
+        .then(response => {
+            var lateLoansList = document.getElementById('lateLoans');
+            lateLoansList.innerHTML = ''; // Clear the late loans list
+            response.data.forEach(loan => {
+                var listItem = document.createElement('li');
+                listItem.textContent = `Customer: ${loan.customer_name}, Book: ${loan.book_name}, Loan Date: ${loan.loan_date}`;
+                if (loan.return_date) {
+                    listItem.textContent += `, Return Date: ${loan.return_date}`;
+                }
+                lateLoansList.appendChild(listItem);
+            });
+            lateLoansList.style.display = 'block'; // Show the late loans list
+
+            // Store late loans data in local storage
+            localStorage.setItem('lateLoans', JSON.stringify(response.data));
+        })
+        .catch(error => {
+            console.error('Error fetching late loans:', error);
+            alert('Failed to fetch late loans. Please try again later.');
+        });
+}
+
+// Call fetchCustomersAndBooks() to populate dropdowns when the page loads
+window.onload = fetchCustomersAndBooks;
+
+// Check if late loans data is stored in local storage and display it if available
+window.addEventListener('DOMContentLoaded', (event) => {
+    var lateLoansData = localStorage.getItem('lateLoans');
+    if (lateLoansData) {
         var lateLoansList = document.getElementById('lateLoans');
-        lateLoansList.innerHTML = '';
-        response.data.forEach(loan => {
+        var lateLoans = JSON.parse(lateLoansData);
+        lateLoansList.innerHTML = ''; // Clear the late loans list
+        lateLoans.forEach(loan => {
             var listItem = document.createElement('li');
             listItem.textContent = `Customer: ${loan.customer_name}, Book: ${loan.book_name}, Loan Date: ${loan.loan_date}`;
             if (loan.return_date) {
@@ -205,9 +257,26 @@ function fetchLateLoans() {
             }
             lateLoansList.appendChild(listItem);
         });
-    })
-    .catch(error => console.error('Error fetching late loans:', error));
+        lateLoansList.style.display = 'block'; // Show the late loans list
+    }
+});
+
+
+ // Function to mark a loaned book as late
+function markAsLate() {
+    var lateBookDropdown = document.getElementById('lateBookName');
+    var selectedLoan = lateBookDropdown.value;
+
+    // Remove the selected option from the dropdown
+    lateBookDropdown.remove(lateBookDropdown.selectedIndex);
+
+    // Add the selected loan to the list of late loans
+    var lateLoansList = document.getElementById('lateLoans');
+    var listItem = document.createElement('li');
+    listItem.textContent = selectedLoan;
+    lateLoansList.appendChild(listItem);
 }
+
 
 // Call fetchCustomersAndBooks() to populate dropdowns when the page loads
 window.onload = fetchCustomersAndBooks;
