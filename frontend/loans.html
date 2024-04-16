@@ -97,15 +97,31 @@ function loanBook() {
         return;
     }
 
+    // Check if the book is already on loan
+    var allLoansList = document.getElementById('allLoans');
+    var loans = allLoansList.getElementsByTagName('li');
+    for (var i = 0; i < loans.length; i++) {
+        var loan = loans[i];
+        var loanBookName = loan.textContent.split(',')[1].trim().split(':')[1].trim();
+        if (loanBookName === bookName) {
+            alert("This book is already on loan.");
+            return;
+        }
+    }
+
+    // If the book is not on loan, proceed to loan it
     axios.post('/loan_book', {
         customer_name: customerName,
         book_name: bookName
     })
     .then(response => {
         alert(response.data.message);
+        // Refresh the list of loans
+        fetchAllLoans();
     })
     .catch(error => console.error('Error:', error));
 }
+
 
 function fetchAllLoans() {
     axios.get('/loans')
@@ -198,3 +214,4 @@ window.onload = fetchCustomersAndBooks;
     </script>
 </body>
 </html>
+
