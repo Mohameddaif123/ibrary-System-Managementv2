@@ -42,7 +42,8 @@ This project is a library management system developed using Flask, SQLAlchemy, a
 1. Clone the repository:
 
     ```bash
-    [git clone https://github.com/yourusername/library-management-system.git](https://github.com/Mohameddaif123/ibrary-System-Managementv2)
+    git clone https://github.com/Mohameddaif123/library-System-Managementv2
+
     ```
 
 2. Change to the project directory:
